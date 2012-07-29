@@ -1627,7 +1627,7 @@ Once you've downloaded [MongoDB](http://www.mongodb.org/downloads), you'll need 
 
 MongoDB stores data in the bin/data/db folder but won't actually create this directory for you. Navigate to where you've downloaded and extracted MongoDB and run the following from terminal:
 
-```html
+```
 sudo mkdir -p /data/db/
 sudo chown `id -u` /data/db
 ```
@@ -1638,13 +1638,13 @@ Once this is done, open up two terminal windows.
 
 In the first, `cd` to your MongoDB bin directory or type in the complete path to it. You'll need to start `mongod`.
 
-```html
+```
 $ ./bin/mongod
 ```
 
 Next, in the second terminal, start the `mongo` shell which will connect up to localhost by default.
 
-```html
+```
 $ ./bin/mongo
 ```
 
@@ -1659,7 +1659,7 @@ Option 1 (HTML) and Option 2 (Jade) of the practical download both come with an 
 
 **install.sh**
 
-```html
+```
 #!/bin/bash
 npm install express
 npm install mongodb --mongodb:native
@@ -1670,13 +1670,13 @@ npm install jade
 
 * After you've installed all of the dependencies for the stack, we can get to cloning the repo containing our practicals and running them. Start by running the below lines:
    
-```html
+```
 git clone git://github.com/addyosmani/backbone-boilerplates.git
 cd option2
 node app.js
 ```
 
-For option1 (without Jade), simply cd into option1 and run `node app.js` from there.
+For option1 (without Jade), simply `cd` into option1 and run `node app.js` from there.
 
 Finally, either of the example apps can now be accessed by navigating to:
 
@@ -2070,13 +2070,13 @@ sudo chown `id -u` /data/db
 
 Once this is done, open up two terminal windows. 
 
-In the first, cd to your MongoDB bin directory or type in the complete path to it. You'll need to start mongod.
+In the first, `cd` to your MongoDB bin directory or type in the complete path to it. You'll need to start `mongod`.
 
 ```
 $ ./bin/mongod
 ```
 
-Finally, in the second terminal, start the mongo shell which will connect up to localhost by default.
+Next, in the second terminal, start the mongo shell which will connect up to localhost by default.
 
 ```
 $ ./bin/mongo
@@ -2308,7 +2308,7 @@ class TodoApp < Sinatra::Base
 ```
 
 `haml :index` instructs Sinatra to use the `views/index.haml` for the application index, whilst ```attr_wrapper``` is simply defining the values to be used for any local variables defined inside the template.
-This similarly applies Todo items with the template `views/todo.haml'.
+This similarly applies Todo items with the template `views/todo.haml`.
 
 The rest of our routes make use of the `params` hash and a number of useful helper methods included with the MongoDB Ruby driver. For more details on these, please
 read the comments I've made inline below:
@@ -4243,7 +4243,7 @@ In the previous section you may have noticed that we initially declared a variab
 
 Now that we've reviewed some fundamentals, let's go through downloading Jasmine and getting everything setup to write tests. 
 
-A standalone release of Jasmine can be [downloaded](http://pivotal.github.com/jasmine/download.html) from the official release page. 
+A standalone release of Jasmine can be [downloaded](https://github.com/pivotal/jasmine/downloads) from the official release page. 
 
 You'll need a file called SpecRunner.html in addition to the release. It can be downloaded from https://github.com/pivotal/jasmine/tree/master/lib/jasmine-core/example or as part of a download of the complete Jasmine [repo](https://github.com/pivotal/jasmine/zipball/master).Alternatively, you can ```git clone``` the main Jasmine repository from https://github.com/pivotal/jasmine.git. 
 
@@ -4464,7 +4464,7 @@ Similar to model attributes, it's also quite straight-forward to test attributes
 it('Can have a url property to define the basic url structure for all contained models.', function() {
         var todos = new TodoList();
         
-        // what has been specified as the url base in our model?
+        // what has been specified as the url base in our collection?
         expect(todos.url).toBe('/todos/');
 });
     
