@@ -176,7 +176,7 @@ Topics will include MVC theory and how to build applications using Backbone's mo
 
 #<a name="fundamentals">Fundamentals</a>
 
-In this section, we're going to explore how frameworks like Backbone.js fit in the world of JavaScript application architecture. Clasically, developers creating desktop and server-class applications have had a wealth of design patterns available for them to lean on, but it's only been in the past few years that such patterns have come to client-side development.
+In this section, we're going to explore how frameworks like Backbone.js fit in the world of JavaScript application architecture. Classically, developers creating desktop and server-class applications have had a wealth of design patterns available for them to lean on, but it's only been in the past few years that such patterns have come to client-side development.
 
 Before exploring any JavaScript frameworks that assist in structuring applications, it can be useful to gain a basic understanding of architectural design patterns.
 
@@ -808,7 +808,7 @@ myPhoto.set({ title: "On the beach" });
 //logs Remember to set a source for your image!
 ```
 
-**Note**: Backbone passes the `attributes` object by shallow copy to the `validate` function using the Underscore `_.extend` method. This means that it is not possible to change any `Number`, `String` or `Boolean` attribute by reference in the way that one might expect a JavaScript object to behave. As shallow copy doesn't copy objects by implicitly copying them, but rather, by reference, one ca change the attributes on those objects.
+**Note**: Backbone passes the `attributes` object by shallow copy to the `validate` function using the Underscore `_.extend` method. This means that it is not possible to change any Number, String or Boolean attribute but it *is* possible to change attributes of objects because they are passed by reference. As shallow copy doesn't copy objects by implicitly copying them, but rather, by reference, one can change the attributes on those objects.
 
 An example of this (by @fivetanley) is available [here](http://jsfiddle.net/2NdDY/7/).
 
