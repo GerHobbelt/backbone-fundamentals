@@ -925,11 +925,15 @@ var mySkiingCrash = PhotoCollection.getByCid(456);
 Backbone Collections don't have setters as such, but do support adding new models via `.add()` and removing models via `.remove()`.
 
 ```javascript
-var a = new Backbone.Model({ title: 'my vacation'}),
-    b = new Backbone.Model({ title: 'my holiday'});
+var a = new Photo({ title: 'my vacation'}),
+    b = new Photo({ title: 'my holiday'}),
+    c = new Photo({ title: 'my weekend'});
 
 var photoCollection = new PhotoCollection([a,b]);
+photoCollection.add(c);
+
 photoCollection.remove([a,b]);
+photoCollection.remove(c);
 ```
 
 **Listening for events**
@@ -1934,9 +1938,9 @@ To keep thing simple, we'll keep things 'read-only' at the moment, and won't pro
 ```
 
 
-You can see we've got a couple of things going on, an el (element), a `statsTemplate`, a constructor function and several view specific methods. On the left of the el: key is a DOM element selector for the element with ID `todoapp`. The value of this is just a string and Backbone will create a reference pointing to any element matching the selector #todoapp, where here it will be the `<section id=”todoapp />` element, defined in the HTML section earlier.
+You can see we've got a couple of things going on, an el (element), a `statsTemplate`, a constructor function and several view specific methods. To the right of the `el:` key is a DOM element selector for the element with ID `todoapp`. The value of this is just a string and Backbone will create a reference pointing to the element matching the selector #todoapp, where here it will be the `<section id="todoapp" />` element, which we previously defined in our HTML.
 
-In a nutshell this means we can now refer to this.el in our controller, which points to the `<section class="todoapp" />` element. As you can see, we're referring to el in the `addOne()` function, appending an element to the list.
+In a nutshell this means we can now refer to this.el in our controller, which points to the `<section id="todoapp" />` element. As you can see, we're referring to el in the `addOne()` function, appending an element to the list.
 
 Now let's take a look at the constructor function. It's binding to several events on the Todo model, such as add, reset and all. Since we're delegating handling of updates and deletes to the `TodoView` view, we don't need to to worry about that here. The two pieces of logic are:
 
@@ -2447,7 +2451,7 @@ $ git clone git://github.com/tbranyen/backbone-boilerplate.git
 or alternatively, just fetching the latest tarball as follows:
 
 ```shell
-curl -C - -O https://github.com/tbranyen/backbone-boilerplate/zipball/master
+$ curl -C - -O https://github.com/tbranyen/backbone-boilerplate/zipball/master
 ```
 
 ### Grunt-BBB
@@ -2465,8 +2469,8 @@ $ npm install -g grunt
 # followed by
 $ npm install -g bbb
 
-# Create a new project
-bbb init
+# finally create a new project
+$ bbb init
 ```
 
 That's it. We should now be good to go.
@@ -2767,7 +2771,7 @@ We can easily create a new Boilerplate module using `grunt-bbb` once again using
 
 ```shell
 # Create a new module
-bbb init:module
+$ bbb init:module
 
 # Grunt prompt
 Please answer the following:
@@ -2999,7 +3003,7 @@ If you would like to learn more about how this project helps structure your app,
 
 These include a boilerplate tutorial project (`bbb init:tutorial`) and an implementation of my [TodoMVC](http://todomvc) project (`bbb init:todomvc`). I recommend checking these out as they'll provide you with a more complete picture of how Backbone Boilerplate, its templates and so on fit into the overall setup for a web app.
 
-For more about Grunt-BBB, remember to take a look at the official project [repositoryy](https://github.com/backbone-boilerplate/grunt-bbb). There is also a related [slide-deck](https://dl.dropbox.com/u/79007/talks/Modern_Web_Applications/slides/index.html) available for those interested in reading more.
+For more about Grunt-BBB, remember to take a look at the official project [repository](https://github.com/backbone-boilerplate/grunt-bbb). There is also a related [slide-deck](https://dl.dropbox.com/u/79007/talks/Modern_Web_Applications/slides/index.html) available for those interested in reading more.
 
 ## Related Tools & Projects
 
