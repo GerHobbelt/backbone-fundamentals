@@ -3852,7 +3852,6 @@ One potential solution to the problem could be to validate all fields and return
 
 ```javascript
 validate: function(attrs) {
-
   var errors = {};
 
   if (!attrs.firstname) errors.firstname = 'first name is empty';
@@ -3860,7 +3859,6 @@ validate: function(attrs) {
   if (!attrs.email) errors.email = 'email is empty';
 
   if (!_.isEmpty(errors)) return errors;
-
 }
 ```
 
@@ -3871,9 +3869,7 @@ This can be adapted into a complete solution that defines a Field model for each
 $(function($) {
 
   var User = Backbone.Model.extend({
-
     validate: function(attrs) {
-
       var errors = this.errors = {};
 
       if (!attrs.firstname) errors.firstname = 'firstname is required';
@@ -3881,37 +3877,25 @@ $(function($) {
       if (!attrs.email) errors.email = 'email is required';
 
       if (!_.isEmpty(errors)) return errors;
-
     }
-
   });
 
   var Field = Backbone.View.extend({
-
     events: {blur: 'validate'},
-
     initialize: function() {
-
       this.name = this.$el.attr('name');
       this.$msg = $('[data-msg=' + this.name + ']');
-
     },
-
     validate: function() {
-
       this.model.set(this.name, this.$el.val());
       this.$msg.text(this.model.errors[this.name] || '');
-
     }
-
   });
 
   var user = new User;
 
   $('input').each(function() {
-
     new Field({el: this, model: user});
-
   });
 
 });
@@ -3919,14 +3903,12 @@ $(function($) {
 ```
 
 
-This works great as the solution checks the validation for each attribute individually and sets the message for the correct blurred field.
+This works great as the solution checks the validation for each attribute individually and sets the message for the correct blurred field. A [demo](http://jsbin.com/afetez/2/edit) of the above by [@braddunbar](http://github.com/braddunbar) is also available.
 
-**Note**: A [demo](http://jsbin.com/afetez/2/edit) of the above solution by [@braddunbar](http://github.com/braddunbar) is also available.
-
-Unfortunately, this solution forces each form field to be validated every time a blur event is fired.
+It unfortunately however forces us to validate all of your form fields every time.
 If we have multiple client-side validation methods with our particular use case, we may not want to have to call each validation method on every attribute every time, so this solution might not be ideal for everyone.
 
-A potentially better alternative to the above solution is to use [@gfranko](http://github.com/gfranko)'s [Backbone.validateAll](https://github.com/gfranko/Backbone.validateAll) plugin, which was specifically created to provide an option to validate only Model properties that are currently being set/saved.
+A potentially better alternative to the above is to use [@gfranko](http://github.com/@franko)'s [Backbone.validateAll](https://github.com/gfranko/Backbone.validateAll) plugin, specifically created to validate specific Model properties (or form fields) without worrying about the validation of any other Model properties (or form fields).
 
 Here is how we would setup a partial User Model and validate method using this plugin, that caters to our use-case:
 
@@ -3936,74 +3918,78 @@ Here is how we would setup a partial User Model and validate method using this p
 // Create a new User Model
 var User = Backbone.Model.extend({
 
-  // RegEx Patterns
-  patterns: {
+      // RegEx Patterns
+      patterns: {
 
           specialCharacters: '[^a-zA-Z 0-9]+',
 
           digits: '[0-9]',
 
           email: '^[a-zA-Z0-9._-]+@[a-zA-Z0-9][a-zA-Z0-9.-]*[.]{1}[a-zA-Z]{2,6}$'
-  },
+      },
 
-  // Validators
-  validators: {
+    // Validators
+      validators: {
 
-    minLength: function(value, minLength) {
+      minLength: function(value, minLength) {
+            return value.length >= minLength;
 
-      return value.length >= minLength;
+          },
 
-    },
+          maxLength: function(value, maxLength) {
+            return value.length <= maxLength;
 
-    maxLength: function(value, maxLength) {
+          },
 
-      return value.length <= maxLength;
+           isEmail: function(value) {
+            return User.prototype.validators.pattern(value, User.prototype.patterns.email);
 
-    },
+          },
 
-    isEmail: function(value) {
+          hasSpecialCharacter: function(value) {
+            return User.prototype.validators.pattern(value, User.prototype.patterns.specialCharacters);
 
-      return User.prototype.validators.pattern(value, User.prototype.patterns.email);
-
-    },
-
-    hasSpecialCharacter: function(value) {
-
-      return User.prototype.validators.pattern(value, User.prototype.patterns.specialCharacters);
-
-    },
-    ...
+          },
+         ...
 
     // We can determine which properties are getting validated by
     // checking to see if properties are equal to null
 
-    validate: function(attrs) {
+        validate: function(attrs) {
 
-      var errors = this.errors = {};
+          var errors = this.errors = {};
 
-      if(attrs.firstname != null) {
+          if(attrs.firstname != null) {
+              if (!attrs.firstname) {
+                  errors.firstname = 'firstname is required';
+                  console.log('first name isEmpty validation called');
+              }
 
-        if (!attrs.firstname) errors.firstname = 'firstname is required';
-        else if(!this.validators.minLength(attrs.firstname, 2)) errors.firstname = 'firstname is too short';
-        else if(!this.validators.maxLength(attrs.firstname, 15)) errors.firstname = 'firstname is too large';
-        else if(this.validators.hasSpecialCharacter(attrs.firstname)) errors.firstname = 'firstname cannot contain special characters';
+              else if(!this.validators.minLength(attrs.firstname, 2))
+                errors.firstname = 'firstname is too short';
+              else if(!this.validators.maxLength(attrs.firstname, 15))
+                errors.firstname = 'firstname is too large';
+              else if(this.validators.hasSpecialCharacter(attrs.firstname)) errors.firstname = 'firstname cannot contain special characters';
+          }
 
-      }
+          if(attrs.lastname != null) {
 
-      if(attrs.lastname != null) {
+              if (!attrs.lastname) {
+                  errors.lastname = 'lastname is required';
+                  console.log('last name isEmpty validation called');
+              }
 
-        if (!attrs.lastname) errors.lastname = 'lastname is required';
-        else if(!this.validators.minLength(attrs.lastname, 2)) errors.lastname = 'lastname is too short';
-        else if(!this.validators.maxLength(attrs.lastname, 15)) errors.lastname = 'lastname is too large';
-        else if(this.validators.hasSpecialCharacter(attrs.lastname)) errors.lastname = 'lastname cannot contain special characters';
+              else if(!this.validators.minLength(attrs.lastname, 2))
+                errors.lastname = 'lastname is too short';
+              else if(!this.validators.maxLength(attrs.lastname, 15))
+                errors.lastname = 'lastname is too large';
+              else if(this.validators.hasSpecialCharacter(attrs.lastname)) errors.lastname = 'lastname cannot contain special characters';
 
-      }
+          }
 ```
 
 
 This allows the logic inside of our validate methods to determine which form fields are currently being set/validated, and does not care about the other model properties that are not trying to be set.
-
-**Note**: A [demo](http://jsbin.com/afetez/11/edit) of the above solution by [@gfranko](http://github.com/gfranko) is also available.
 
 It's fairly straight-forward to use as well. We can simply define a new Model instance and then set the data on our model using the `validateAll` option to use the behavior defined by the plugin:
 
@@ -9784,7 +9770,7 @@ That's it for this section on testing applications with QUnit and SinonJS. I enc
 
 Whilst what we get with Backbone out of the box can be terribly useful, there are some equally beneficial add-ons that can help simplify our development process. These include:
 
-* [Backbone Marionette](http://marionettejs.com)
+* [Backbone Marionette](https://github.com/derickbailey/backbone.marionette)
 * [Backbone Layout Manager](https://github.com/tbranyen/backbone.layoutmanager)
 * [Backbone Boilerplate](https://github.com/backbone-boilerplate/backbone-boilerplate)
 * [Backbone Model Binding](https://github.com/derickbailey/backbone.modelbinding)
