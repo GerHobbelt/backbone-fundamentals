@@ -472,15 +472,15 @@ code > span.er { color: #ff0000; font-weight: bold; }
 
   <span class="kw">var</span> Todos = <span class="kw">Backbone.Collection</span>.<span class="fu">extend</span>({
     <span class="dt">model</span>: Todo,
-
+    
     <span class="co">// For simplicity we&#39;ll use localStorage throughout the first part of book.</span>
     <span class="co">// Save all of the todo items under the `&quot;todos&quot;` namespace.</span>
     <span class="dt">localStorage</span>: <span class="kw">new</span> Store(<span class="ch">&#39;todos-backbone&#39;</span>)
-
+    
     <span class="co">// When working with REST API on back-end here would be</span>
     <span class="co">// appropriate to use:</span>
     <span class="co">// url: &quot;/todos&quot;</span>
-
+    
   });
 
   <span class="kw">var</span> firstTodo = <span class="kw">new</span> Todo({<span class="dt">title</span>:<span class="ch">&#39;Read whole book&#39;</span>});
@@ -3412,7 +3412,7 @@ $(<span class="kw">function</span>($) {
 <p>It’s fairly straight-forward to use as well. We can simply define a new Model instance and then set the data on our model using the <code>validateAll</code> option to use the behavior defined by the plugin:</p>
 <pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">var</span> user = <span class="kw">new</span> User();
 <span class="kw">user</span>.<span class="fu">set</span>({ <span class="ch">&#39;firstname&#39;</span>: <span class="ch">&#39;Greg&#39;</span> }, {<span class="dt">validateAll</span>: <span class="kw">false</span>});</code></pre>
-<p>That’s it!.</p>
+<p>That’s it!</p>
 <p>The Backbone.validateAll logic doesn’t override the default Backbone logic by default and so it’s perfectly capable of being used for scenarios where you might care more about field-validation <a href="http://jsperf.com/backbone-validateall">performance</a> as well as those where you don’t. Both solutions presented in this section should work fine however.</p>
 <h1 id="restful-applications"><a href="#TOC">RESTful Applications</a></h1>
 <h2 id="building-restful-applications-with-backbone"><a href="#TOC">Building RESTful applications with Backbone</a></h2>
@@ -5487,7 +5487,7 @@ $(<span class="ch">&#39;#content&#39;</span>).<span class="fu">html</span>(<span
 
   <span class="co">// Layout Footer View</span>
   <span class="co">// ------------------</span>
-
+  
   <span class="kw">Layout</span>.<span class="fu">Footer</span> = <span class="kw">Backbone.Marionette.Layout</span>.<span class="fu">extend</span>({
     <span class="dt">template </span>: <span class="ch">&#39;#template-footer&#39;</span>,
 
@@ -5574,7 +5574,7 @@ $(<span class="ch">&#39;#content&#39;</span>).<span class="fu">html</span>(<span
   <span class="co">//</span>
   <span class="co">// Control the workflow and logic that exists at the application</span>
   <span class="co">// level, above the implementation detail of views and models</span>
-
+  
   <span class="kw">TodoList</span>.<span class="fu">Controller</span> = <span class="kw">function</span>(){
     <span class="kw">this</span>.<span class="fu">todoList</span> = <span class="kw">new</span> <span class="kw">App.Todos</span>.<span class="fu">TodoList</span>();
   };
@@ -5623,7 +5623,7 @@ $(<span class="ch">&#39;#content&#39;</span>).<span class="fu">html</span>(<span
   <span class="co">// Get the TodoList up and running by initializing the mediator</span>
   <span class="co">// when the the application is started, pulling in all of the</span>
   <span class="co">// existing Todo items and displaying them.</span>
-
+  
   <span class="kw">TodoList</span>.<span class="fu">addInitializer</span>(<span class="kw">function</span>(){
 
     <span class="kw">var</span> controller = <span class="kw">new</span> <span class="kw">TodoList</span>.<span class="fu">Controller</span>();
@@ -5760,7 +5760,7 @@ $(<span class="ch">&#39;#content&#39;</span>).<span class="fu">html</span>(<span
   <span class="co">//</span>
   <span class="co">// Handler for filtering the list of items by showing and</span>
   <span class="co">// hiding through the use of various CSS classes</span>
-
+  
   <span class="kw">App.vent</span>.<span class="fu">on</span>(<span class="ch">&#39;todoList:filter&#39;</span>,<span class="kw">function</span>(filter) {
     filter = filter || <span class="ch">&#39;all&#39;</span>;
     $(<span class="ch">&#39;#todoapp&#39;</span>).<span class="fu">attr</span>(<span class="ch">&#39;class&#39;</span>, <span class="ch">&#39;filter-&#39;</span> + filter);
@@ -5774,7 +5774,7 @@ $(<span class="ch">&#39;#content&#39;</span>).<span class="fu">html</span>(<span
 
   <span class="co">// Todo Model</span>
   <span class="co">// ----------</span>
-
+  
   <span class="kw">Todos</span>.<span class="fu">Todo</span> = <span class="kw">Backbone.Model</span>.<span class="fu">extend</span>({
     <span class="dt">localStorage</span>: <span class="kw">new</span> <span class="kw">Backbone</span>.<span class="fu">LocalStorage</span>(<span class="ch">&#39;todos-backbone&#39;</span>),
 

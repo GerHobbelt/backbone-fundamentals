@@ -136,15 +136,15 @@ origins
 \line
   var Todos = Backbone.Collection.extend(\{\line
     model: Todo,\line
-\line
+    \line
     // For simplicity we'll use localStorage throughout the first part of book.\line
     // Save all of the todo items under the `"todos"` namespace.\line
     localStorage: new Store('todos-backbone')\line
-\line
+    \line
     // When working with REST API on back-end here would be\line
     // appropriate to use:\line
     // url: "/todos"\line
-\line
+    \line
   \});\line
 \line
   var firstTodo = new Todo(\{title:'Read whole book'\});\line
@@ -3232,7 +3232,7 @@ var User = Backbone.Model.extend(\{\line
 {\pard \ql \f0 \sa180 \li0 \fi0 It\u8217's fairly straight-forward to use as well. We can simply define a new Model instance and then set the data on our model using the {\f1 validateAll} option to use the behavior defined by the plugin:\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 \f1 var user = new User();\line
 user.set(\{ 'firstname': 'Greg' \}, \{validateAll: false\});\par}
-{\pard \ql \f0 \sa180 \li0 \fi0 That\u8217's it!.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 That\u8217's it!\par}
 {\pard \ql \f0 \sa180 \li0 \fi0 The Backbone.validateAll logic doesn\u8217't override the default Backbone logic by default and so it\u8217's perfectly capable of being used for scenarios where you might care more about field-validation {\field{\*\fldinst{HYPERLINK "http://jsperf.com/backbone-validateall"}}{\fldrslt{\ul
 performance
 }}}
@@ -5502,7 +5502,7 @@ TodoMVC.on('initialize:after', function()\{\line
 \line
   // Layout Footer View\line
   // ------------------\line
-\line
+  \line
   Layout.Footer = Backbone.Marionette.Layout.extend(\{\line
     template : '#template-footer',\line
 \line
@@ -5589,7 +5589,7 @@ TodoMVC.on('initialize:after', function()\{\line
   //\line
   // Control the workflow and logic that exists at the application\line
   // level, above the implementation detail of views and models\line
-\line
+  \line
   TodoList.Controller = function()\{\line
     this.todoList = new App.Todos.TodoList();\line
   \};\line
@@ -5638,7 +5638,7 @@ TodoMVC.on('initialize:after', function()\{\line
   // Get the TodoList up and running by initializing the mediator\line
   // when the the application is started, pulling in all of the\line
   // existing Todo items and displaying them.\line
-\line
+  \line
   TodoList.addInitializer(function()\{\line
 \line
     var controller = new TodoList.Controller();\line
@@ -5785,7 +5785,7 @@ http://lostechies.com/derickbailey/2012/02/06/3-stages-of-a-backbone-application
   //\line
   // Handler for filtering the list of items by showing and\line
   // hiding through the use of various CSS classes\line
-\line
+  \line
   App.vent.on('todoList:filter',function(filter) \{\line
     filter = filter || 'all';\line
     $('#todoapp').attr('class', 'filter-' + filter);\line
@@ -5799,7 +5799,7 @@ http://lostechies.com/derickbailey/2012/02/06/3-stages-of-a-backbone-application
 \line
   // Todo Model\line
   // ----------\line
-\line
+  \line
   Todos.Todo = Backbone.Model.extend(\{\line
     localStorage: new Backbone.LocalStorage('todos-backbone'),\line
 \line
