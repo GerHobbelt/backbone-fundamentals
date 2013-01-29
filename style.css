@@ -27,7 +27,7 @@ a img {
     border: none;
 }
 p {
-    margin-bottom: 9px;
+    margin-bottom: 20px;
 }
 h1,
 h2,
@@ -116,6 +116,14 @@ pre code {
 }
 figure img {
   max-width: 100%;
+}
+
+ul li a{
+   font-weight:bold;
+}
+
+ul li ul a{
+  font-weight:normal;
 }
 
 @media screen and (min-width: 768px) {
