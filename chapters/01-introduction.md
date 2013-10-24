@@ -4,13 +4,13 @@ Frank Lloyd Wright once said “You can’t make an architect. You can however o
 
 The goal of all architecture is to build something well; in our case, to craft code that is enduring and delights both ourselves and the developers who will maintain our code long after we are gone. We all want our architecture to be simple, yet beautiful.
 
-When writing a web application from scratch it can be easy to feel like you can get by simply relying on a DOM manipulation library (such as jQuery) and a handful of plugins. The challenge with this approach is that it doesn’t take long to get lost in a nested pile of callbacks and DOM elements without any real structure in place.
-
-In short, you can end up with a pile of spaghetti code - code that is disorganized and difficult to follow. This type of code has no simple panacea, short of a rewrite that may end up costing both time and money to complete. Fortunately, there are ways to avoid this problem.
-
 Modern JavaScript frameworks and libraries can bring structure and organization to your projects, establishing a maintainable foundation right from the start. They build on the trials and tribulations of developers who have had to work around callback chaos similar to that which you are facing now or may in the near future.
 
-In "Developing Backbone.js Applications," I and a number of other experienced authors will show you how to improve your web application structure using one such library - Backbone.js.
+When developing applications using just jQuery, the piece missing is a way to structure and organize your code. It's very easy to create a JavaScript app that ends up a tangled mess of jQuery selectors and callbacks, all desperately trying to keep data in sync between the HTML for your UI, the logic in your JavaScript, and calls to your API for data.
+
+Without something to help tame the mess, you're likely to string together a set of independent plugins and libraries to make up the functionality or build everything yourself from scratch and have to maintain it yourself. Backbone solves this problem for you, providing a way to cleanly organize code, separating responsibilities into recognizable pieces that are easy to maintain.
+
+In "Developing Backbone.js Applications," I and a number of other experienced authors will show you how to improve your web application structure using the popular JavaScript library, Backbone.js
 
 ### What Is MVC?
 
@@ -33,7 +33,12 @@ For this reason we refer to such frameworks as following the MV* pattern; that i
 Backbone.js is a lightweight JavaScript library that adds structure to your client-side code. It makes it easy to manage and decouple concerns in your application, leaving you with code that is more maintainable in the long term.
 
 Developers commonly use libraries like Backbone.js to create single-page applications (SPAs). SPAs are web applications that load into the browser and then react to data changes on the client side without requiring complete page refreshes from the server.
-Backbone.js is a mature, popular library at the time of writing and has both a large development community online as well as a wealth of plugins and extensions available that build upon it. It has been used to create non-trivial applications by companies such as Disqus, Walmart, SoundCloud and Foursquare.
+
+Backbone is mature, popular, and has both a vibrant developer community as well as a wealth of plugins and extensions available that build upon it. It has been used to create non-trivial applications by companies such as Disqus, Walmart, SoundCloud and LinkedIn.
+
+Backbone focuses on giving you helpful methods for querying and manipulating your data rather than re-inventing the JavaScript object model. It's a library, rather than a framework, that plays well with others and scales well, from embedded widgets to large-scale applications.
+
+As it's small, there is also less your users have to download on mobile or slower connections. The entire Backbone source can be read and understood in just a few hours.
 
 ### When Do I Need A JavaScript MVC Framework?
 
@@ -45,7 +50,7 @@ There’s a lot more that goes into structuring an application than tying togeth
 
 So, where will you likely need an MV* framework and where won’t you?
 
-If you’re writing an application where much of the heavy lifting for view rendering and data manipulation will be occurring in the browser, you may find a JavaScript MV* framework useful. Examples of applications that fall into this category are GMail and Google Docs.
+If you’re writing an application where much of the heavy lifting for view rendering and data manipulation will be occurring in the browser, you may find a JavaScript MV* framework useful. Examples of applications that fall into this category are GMail, NewsBlur and the LinkedIn mobile app.
 
 These types of applications typically download a single payload containing all the scripts, stylesheets, and markup users need for common tasks and then perform a lot of additional behavior in the background. For instance, it’s trivial to switch between reading an email or document to writing one without sending a new page request to the server.
 
@@ -56,21 +61,17 @@ Maturity in software (framework) development isn't simply about how long a frame
 
 ### Why Consider Backbone.js?
 
-Does the following describe you?:
+Backbone provides a minimal set of data-structuring (Models, Collections) and user interface (Views, URLs) primitives that are helpful when building dynamic applications using JavaScript. It's not opinionated, meaning you have the freedom and flexibility to build the best experience for your web application how you see fit. You can either use the prescribed architecture it offers out of the box or extend it to meet your requirements.
 
-"I want a flexible library which allows me to cleanly separate concerns in my application. It should support a persistence layer and RESTful sync, models, views, event-driven communication and routing. I’d like some decisions about the architecture left up to me."
+The library doesn't focus on widgets or replacing the way you structure objects - it just supplies you with utilities for manipulating and querying data in your application. It also doesn't prescribe a specific template engine - while you are free to use the Micro-templating offered by Underscore.js (one of its dependencies), views can bind to HTML constructed using your templating solution of choice.
 
-As I may be building something complex, I’d like there to be an active extension community around the framework that is already addressing issues I may run into down the road. Ideally, there are also scaffolding tools available for the solution."
+Looking at the [large](http://backbonejs.org/#examples) number of applications built with Backbone, it's clear that it scales well. Backbone also works quite well with other libraries, meaning you can embed Backbone widgets in an application written with AngularJS, use it with TypeScript, or just use an individual class (like Models) as a data backer for simpler apps.
 
-If so, continue reading.
+There are no performance drawbacks to using Backbone to structure your application. It avoids run loops, two-way binding, and constant polling of your data structures for updates and tries to keep things simple where possible. That said, should you wish to go against the grain, you can of course implement such things on top of it. Backbone won't stop you.
 
-Backbone's main benefits, regardless of your target platform or device, include helping:
+With a vibrant community of plugin and extension authors, there's a likelihood that if you're looking to achieve some behavior Backbone is lacking, a complementary project exists that works well with it. This is made simpler by Backbone offering literate documentation of its source code, allowing anyone an opportunity to easily understand what is going on behind the scenes.
 
-* Organize the structure to your application
-* Simplify server-side persistence
-* Decouple the DOM from your page's data
-* Model data, views, and routers in a succinct manner
-* Provide DOM, model, and collection synchronization
+Having been refined over two and a half years of development, Backbone is a mature library that will continue to offer a minimalist solution for building better web applications. I regularly use it and hope that you find it as useful an addition to your toolbelt as I have.
 
 
 ### Setting Expectations
@@ -83,28 +84,34 @@ Here is a peek at what you will be learning in each chapter:
 
 <i>Chapter 2, Fundamentals</i> traces the history of the MVC design pattern and introduces how it is implemented by Backbone.js and other JavaScript frameworks.
 
-<i>Chapter 3, Backbone Basics</i> covers the major features of the core Backbone.js framework and technologies and techniques you will need to know in order to apply it.
+<i>Chapter 3, Backbone Basics</i> covers the major features of the Backbone.js core and the technologies and techniques you will need to know in order to apply it.
 
 <i>Chapter 4, Exercise 1: Todos - Your First Backbone.js App</i> takes you step-by-step through development of a simple client-side Todo List application.
 
 <i>Chapter 5, Exercise 2: Book Library - Your First RESTful Backbone.js App</i> walks you through development of a Book Library application which persists its model to a server using a REST API.
 
-<i>Chapter 6, Backbone Boilerplate And Grunt BBB</i> introduces powerful tools you can use to bootstrap a new Backbone.js application with boilerplate code.
+<i>Chapter 6, Backbone Extensions</i> describes Backbone.Marionette and Thorax, two extension frameworks which add features to Backbone.js that are useful for developing large-scale applications.
 
 <i>Chapter 7, Common Problems and Solutions</i> reviews common issues you may encounter when using Backbone.js and ways of addressing them.
 
-<i>Chapter 8, Backbone Extensions</i> describes Backbone.Marionette and Thorax, two extension frameworks which add features to Backbone.js that are useful for developing large-scale applications.
+<i>Chapter 8, Modular Development</i> looks at how AMD modules and RequireJS can be used to modularize your code.
 
-<i>Chapter 9, Modular Development</i> looks at how AMD modules and RequireJS can be used to modularize your code.
+<i>Chapter 9, Exercise 3: Todos - Your First Modular Backbone + RequireJS App</i> takes you through rewriting the app created in Exercise 1 to be more modular with the help of RequireJS.
 
-<i>Chapter 10, Mobile Applications</i> addresses the issues that arise when using Backbone with jQuery Mobile.
+<i>Chapter 10, Paginating Backbone Requests & Collections</i> walks through how to use the Backbone.Paginator plugin to paginate data for your Collections.
 
-<i>Chapter 11, Unit Testing</i> covers how to unit test Backbone code using the Jasmine test framework.
+<i>Chapter 11, Backbone Boilerplate And Grunt BBB</i> introduces powerful tools you can use to bootstrap a new Backbone.js application with boilerplate code.
 
-<i>Chapter 12, Unit Testing Backbone Applications with QUnit and SinonJS</i> discusses how to use the QUnit and SinusJS frameworks for unit testing.
+<i>Chapter 12, Mobile Applications</i> addresses the issues that arise when using Backbone with jQuery Mobile.
 
-<i>Chapter 13, Resources</i> provides references to additional Backbone-related resources.
+<i>Chapter 13, Jasmine</i> covers how to unit test Backbone code using the Jasmine test framework.
 
-<i>Chapter 14, Conclusions</i> wraps up the our tour through the world of Backbone.js development.
+<i>Chapter 14, QUnit</i> discusses how to use QUnit for unit testing.
 
-<i>Chapter 15, Appendix</i> returns to our design pattern discussion by contrasting MVC with the Model-View-Presenter (MVP) pattern and examines how Backbone.js relates to the two patterns. It also provides useful information for existing Backbone users who may be upgrading from Backbone 0.9.2 to version 0.9.10 and beyond.
+<i>Chapter 15, SinonJS</i> discusses how to use SinonJS for unit testing your Backbone apps.
+
+<i>Chapter 16, Resources</i> provides references to additional Backbone-related resources.
+
+<i>Chapter 17, Conclusions</i> wraps up our tour through the world of Backbone.js development.
+
+<i>Chapter 18, Appendix</i> returns to our design pattern discussion by contrasting MVC with the Model-View-Presenter (MVP) pattern and examines how Backbone.js relates to both. A walkthrough of writing a Backbone-like library from scratch and other topics are also covered.

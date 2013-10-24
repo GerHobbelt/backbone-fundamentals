@@ -5,15 +5,47 @@ In this section, we will review a number of common problems developers often exp
 Perhaps the most frequent of these questions surround how to do more with Views. If you are interested in discovering how to work with nested Views, learn about view disposal and inheritance, this section will hopefully have you covered.
 
 
-#### View Nesting
+#### Working With Nested Views
 
 **Problem**
 
-What is the best approach for rendering and appending Subviews in Backbone.js?
+What is the best approach for rendering and appending nested Views (or Subviews) in Backbone.js?
 
-**Solution**
+**Solution 1**
 
-Since web pages are composed of nested elements and Backbone views correspond to elements within the page, nesting views is an intuitive approach to managing a hierarchy of elements. As a beginner, one might try writing a very simple setup with subviews (e.g inner views) as follows:
+Since pages are composed of nested elements and Backbone views correspond to elements within the page, nesting views is an intuitive approach to managing a hierarchy of elements.
+
+The best way to combine views is simply using:
+
+```
+this.$('.someContainer').append(innerView.el);
+```
+
+which just relies on jQuery. We could use this in a real example as follows:
+
+```javascript
+...
+initialize : function () { 
+    //...
+},
+
+render : function () {
+
+    this.$el.empty();
+
+    this.innerView1 = new Subview({options});
+    this.innerView2 = new Subview({options});
+
+    this.$('.inner-view-container')
+        .append(this.innerView1.el)
+        .append(this.innerView2.el);
+}
+```
+
+**Solution 2**
+
+Beginners sometimes also try using `setElement` to solve this problem, however keep in mind that using this method is an easy way to shoot yourself in the foot. Avoid using this approach when the first solution is a viable option:
+
 
 ```javascript
 
@@ -36,59 +68,18 @@ render : function () {
 }
 ```
 
-Here we are creating subviews in the parent view's `initialize()` method and rendering the subviews in the parent's `render()` method. The elements managed by the subviews exist in the parent's template and the `View.setElement()` method is used to re-assign the element associated with each subview. `setElement()` changes a view's element, including re-delegating event handlers by removing them from the old element and binding them to the new element. Note that `setElement()` returns the view, allowing us to chain the call to `render()`.
+Here we are creating subviews in the parent view's `initialize()` method and rendering the subviews in the parent's `render()` method. The elements managed by the subviews exist in the parent's template and the `View.setElement()` method is used to re-assign the element associated with each subview. 
 
-This works and has some positive qualities: you don't need to worry about maintaining the order of your DOM elements when appending, views are initialized early, and the render() method doesn't need to take on too many responsibilities at once. Unfortunately, downsides are that you can't set the `tagName` property of subviews and events need to be re-delegated.
+`setElement()` changes a view's element, including re-delegating event handlers by removing them from the old element and binding them to the new element. Note that `setElement()` returns the view, allowing us to chain the call to `render()`.
 
-An alternative approach which doesn't suffer from the re-delegation problem can be written as follows:
+This works and has some positive qualities: you don't need to worry about maintaining the order of your DOM elements when appending, views are initialized early, and the render() method doesn't need to take on too many responsibilities at once. 
 
-```javascript
-
-initialize : function () {
-
-},
-
-render : function () {
-
-    this.$el.empty();
-
-    this.innerView1 = new Subview({options});
-    this.innerView2 = new Subview({options});
+Unfortunately, downsides are that you can't set the `tagName` property of subviews and events need to be re-delegated. The first solution doesn't suffer from this problem.
 
 
-    this.$el.append(this.innerView1.render().el, this.innerView2.render().el);
-}
+**Solution 3**
 
-```
-
-In this version, we are creating new instances of the subviews, rendering them, and appending their elements to an empty parent element each time the parent is rendered. Each subview is responsible for creating and rendering its own element, so we don't need a template containing empty placeholders and the issue with `tagName`s is solved as they are defined by the subviews once again.
-
-Yet another variation which moves logic into an `onRender` event, could be written with only a few subtle changes:
-
-```javascript
-
-initialize : function () {
-    this.on('render', this.onRender);
-},
-
-render : function () {
-
-    this.$el.html(this.template);
-
-    // more logic
-
-    return this.trigger('render');
-},
-
-onRender : function () {
-    this.innerView1 = new Subview();
-    this.innerView2 = new Subview();
-    this.innerView1.setElement('.some-element').render();
-    this.innerView2.setElement('.some-element').render();
-}
-```
-
-If you find yourself nesting views in your application, there are more optimal approaches possible for initializing, rendering, and appending your subviews. One such solution could be written:
+One more possible solution to this problem could be written:
 
 ```javascript
 
@@ -121,7 +112,9 @@ This tackles a few specific design decisions:
 
 Note that InnerView needs to call `View.delegateEvents()` to bind its event handlers to its new DOM since it is replacing the content of its element.
 
-A second potential solution is this, which may appear cleaner but in reality has a tendency to affect performance:
+**Solution 4**
+
+A better solution, which is more clean but has the potential to affect performance is:
 
 ```javascript
 
@@ -150,15 +143,15 @@ var InnerView = Backbone.View.extend({
 
 If multiple views need to be nested at particular locations in a template, a hash of child views indexed by child view cids' should be created. In the template, use a custom HTML attribute named `data-view-cid` to create placeholder elements for each view to embed. Once the template has been rendered and its output appended to the parent view's `$el`, each placeholder can be queried for and replaced with the child view's `el`.
 
-A sample implementation containing a single child view:
+A sample implementation containing a single child view could be written:
 
 ```javascript
 
 var OuterView = Backbone.View.extend({
     initialize: function() {
         this.children = {};
-        var child = new Backbone.View();
-        this.children[child.cid] = child;
+        this.child = new Backbone.View();
+        this.children[this.child.cid] = this.child;
     },
 
     render: function() {
@@ -171,7 +164,10 @@ var OuterView = Backbone.View.extend({
 
 ```
 
-Generally speaking, more developers opt for the first solution as:
+The use of `cid`s (client ids) here is useful because it illustrates separating a model and its views by having views referenced by their instances and not their attributes. It's quite common to ask for all views that satisfy an attribute on their models, but if you have recursive subviews or repeated views (a common occurrence), you can't simply ask for views by attributes. That is, unless you specify additional attributes that separate duplicates. Using `cid`s solves this problem as it allows for direct references to views.
+
+
+Generally speaking, more developers opt for Solution 1 or 5 as:
 
 * The majority of their views may already rely on being in the DOM in their render() method
 * When the OuterView is re-rendered, views don't have to be re-initialized where re-initialization has the potential to cause memory leaks and issues with existing bindings
@@ -180,9 +176,15 @@ The Backbone extensions [Marionette](#marionette) and [Thorax](#thorax) provide 
 
 (Thanks to [Lukas](http://stackoverflow.com/users/299189/lukas)  and [Ian Taylor](http://stackoverflow.com/users/154765/ian-storm-taylor) for these tips).
 
-#### What is the best way to manage models in nested Views?
+#### Managing Models In Nested Views
 
-In order to reach attributes on related models in a nested setup, the models involved need to have some prior knowledge about which models this refers to. Backbone.js doesn't implicitly handle relations or nesting, meaning it's up to us to ensure models have a knowledge of each other.
+**Problem**
+
+What is the best way to manage models in nested views?
+
+**Solution**
+
+In order to reach attributes on related models in a nested setup, models require some prior knowledge of each other, something which Backbone doesn't implicitly handle out of the box.
 
 One approach is to make sure each child model has a 'parent' attribute. This way you can traverse the nesting first up to the parent and then down to any siblings that you know of. So, assuming we have models modelA, modelB and modelC:
 
@@ -202,73 +204,53 @@ ModelA = Backbone.Model.extend({
 }
 ```
 
-This allows you to reach the parent model in any child model function by calling this.parent.
+This allows you to reach the parent model in any child model function through `this.parent`. 
 
-When you have a need to nest Backbone.js views, you might find it easier to let each view represent a single HTML tag using the tagName option of the View. This may be written as:
+Now, we have already discussed a few options for how to construct nested Views using Backbone. For the sake of simplicity, let us imagine that we are creating a new child view `ViewB` from within the `initialize()` method of `ViewA` below. `ViewB` can reach out over the `ViewA` model and listen out for changes on any of its nested models. 
+
+See inline for comments on exactly what each step is enabling:
 
 ```javascript
+
+// Define View A
 ViewA = Backbone.View.extend({
 
-    tagName: 'div',
-    id: 'new',
-
     initialize: function(){
+       // Create an instance of View B
        this.viewB = new ViewB();
+
+       // Create a reference back to this (parent) view
        this.viewB.parentView = this;
+
+       // Append ViewB to ViewA
        $(this.el).append(this.viewB.el);
     }
 });
 
+// Define View B
 ViewB = Backbone.View.extend({
 
-    tagName: 'h1',
+    //...,
 
-    render: function(){
-        $(this.el).html('Header text'); // or use this.options.headerText or equivalent
-    },
+    initialize: function(){
+        // Listen for changes to the nested models in our parent ViewA
+        this.listenTo(this.model.parent.modelB, "change", this.render);
+        this.listenTo(this.model.parent.modelC, "change", this.render);
 
-    funcB1: function(){
-        this.model.parent.doSomethingOnParent();
-        this.model.parent.modelC.doSomethingOnSibling();
-        $(this.parentView.el).shakeViolently();
+        // We can also call any method on our parent view if it is defined
+        // $(this.parentView.el).shake();
     }
 
 });
+
+// Create an instance of ViewA with ModelA
+// viewA will create its own instance of ViewB
+// from inside the initialize() method
+var viewA = new ViewA({ model: ModelA });
 ```
 
-Then in your application initialization code , you would initiate ViewA and place its element inside the body element.
 
-An alternative approach is to use an extension called [Backbone-Forms](https://github.com/powmedia/backbone-forms). Using a similar schema to what we wrote earlier, nesting could be achieved as follows:
-
-```javascript
-var ModelB = Backbone.Model.extend({
-    schema: {
-        attributeB1: 'Text',
-        attributeB2: 'Text'
-    }
-});
-
-var ModelC = Backbone.Model.extend({
-    schema: {
-        attributeC: 'Text',
-    }
-});
-
-var ModelA = Backbone.Model.extend({
-    schema: {
-        attributeA1: 'Text',
-        attributeA2: 'Text',
-        refToModelB: { type: 'NestedModel', model: ModelB, template: 'templateB' },
-        refToModelC: { type: 'NestedModel', model: ModelC, template: 'templateC' }
-    }
-});
-```
-
-There is more information about this technique available on [GitHub](https://github.com/powmedia/backbone-forms#customising-templates).
-
-(Thanks to [Jens Alm](http://stackoverflow.com/users/100952/jens-alm) and [Artem Oboturov](http://stackoverflow.com/users/801466/artem-oboturov) for these tips)
-
-#### Rendering Parent View from Child
+#### Rendering A Parent View From A Child View
 
 **Problem**
 
@@ -276,9 +258,13 @@ How would one render a Parent View from one of its Children?
 
 **Solution**
 
-If you say, have a view which contains another view (e.g., a main view containing a modal view) and  would like to render or re-render the parent view from the child, this is extremely straight-forward.
+In a scenario where you have a view containing another view, such as a photo gallery containing a larger view modal, you may find that you need to render or re-render the parent view from the child. The good news is that solving this problem is quite straight-forward.
 
-In such a scenario, you would most likely want to execute the rendering when a particular event has occurred. For the sake of example, let us call this event 'somethingHappened'. The parent view can bind notifications on the child view to know when the event has occurred. It can then render itself.
+The simplest solution is to just use `this.parentView.render();`.
+
+If however inversion of control is desired, events may be used to provide an equally valid solution. 
+
+Say we wish to begin rendering when a particular event has occurred. For the sake of example, let us call this event 'somethingHappened'. The parent view can bind notifications on the child view to know when the event has occurred. It can then render itself.
 
 In the parent view:
 
@@ -304,129 +290,9 @@ The child will trigger a "somethingHappened" event and the parent's render funct
 (Thanks to Tal [Bereznitskey](http://stackoverflow.com/users/269666/tal-bereznitskey) for this tip)
 
 
-#### Triggering updates in other Views
+#### Disposing View Hierarchies
 
 **Problem**
-
-How can a View trigger an update in an unrelated View?
-
-**Solution**
-
-The Mediator pattern is an excellent option for implementing a solution to this problem.
-
-Without going into too much detail about the pattern, a mediator can effectively be used as an event manager that lets you to subscribe to and publish events. So an ApplicationViewA could subscribe to an event, (e.g., 'selected') and then the ApplicationViewB would publish the 'selected' event.
-
-The reason I like this is it allows you to send events between views, without the views being directly bound together.
-
-For Example:
-
-```javascript
-
-// See http://addyosmani.com/largescalejavascript/#mediatorpattern
-// for an implementation or alternatively for a more thorough one
-// http://thejacklawson.com/Mediator.js/
-
-var mediator = new Mediator();
-
-var ApplicationViewB = Backbone.View.extend({
-    toggle_select: function() {
-        ...
-        mediator.publish('selected', any, data, you, want);
-        return this;
-    }
-});
-
-var ApplicationViewA = Backbone.View.extend({
-    initialize: function() {
-        mediator.subscribe('selected', this.delete_selected)
-    },
-
-    delete_selected: function(any, data, you, want) {
-        ... do something ...
-    },
-});
-```
-
-This way your ApplicationViewA doesn't care if it is an ApplicationViewB or FooView that publishes the 'selected' event, only that the event occurred. As a result, you may find it a maintainable way to manage events between parts of your application, not just views.
-
-(Thanks to [John McKim](http://stackoverflow.com/users/937577/john-mckim) for this tip and for referencing my Large Scale JavaScript Patterns article).
-
-
-#### Disposing Views cleanly
-
-**Problem**
-
-How do you cleanly dispose Views to avoid memory leaks?
-
-**Solution**
-
-As your application grows, keeping live views around which aren't being used can quickly become difficult to maintain. Instead, you may find it more optimal to destroy views that are no longer required and simply create new ones as the need arises.
-
-A solution to help with this is to create a BaseView from which the rest of your views inherit from. The idea here is that your view will maintain a reference to all of the events to which its subscribed to so that when it is time to dispose of a view, all of those bindings will be automatically unbound.
-
-Here is a sample implementation of this:
-
-```javascript
-var BaseView = function (options) {
-
-    this.bindings = [];
-    Backbone.View.apply(this, [options]);
-};
-
-_.extend(BaseView.prototype, Backbone.View.prototype, {
-
-    bindTo: function (model, ev, callback) {
-
-        model.bind(ev, callback, this);
-        this.bindings.push({ model: model, ev: ev, callback: callback });
-    },
-
-    unbindFromAll: function () {
-        _.each(this.bindings, function (binding) {
-            binding.model.unbind(binding.ev, binding.callback);
-        });
-        this.bindings = [];
-    },
-
-    dispose: function () {
-        this.unbindFromAll(); // this will unbind all events that this view has bound to
-        this.unbind(); // this will unbind all listeners to events from this view. This is probably not necessary because this view will be garbage collected.
-        this.remove(); // uses the default Backbone.View.remove() method which removes this.el from the DOM and removes DOM events.
-    }
-
-});
-```
-
-```javascript
-BaseView.extend = Backbone.View.extend;
-```
-
-Then, whenever a view has the need to bind to an event on a model or a collection, you would use the bindTo method. e.g:
-
-```
-var SampleView = BaseView.extend({
-
-    initialize: function(){
-        this.bindTo(this.model, 'change', this.render);
-        this.bindTo(this.collection, 'reset', this.doSomething);
-    }
-});
-```
-
-When you remove a view, simply call the dispose() method which will clean everything up for you automatically:
-
-```javascript
-var sampleView = new SampleView({model: some_model, collection: some_collection});
-sampleView.dispose();
-```
-
-(Thanks to [JohnnyO](http://stackoverflow.com/users/188740/johnnyo) for this tip).
-
-#### Disposing View hierarchies
-
-**Problem**
-
-In the last question, we looked at how to effectively dispose views to decrease memory usage.
 
 Where your application is setup with multiple Parent and Child Views, it is also common to desire removing any DOM elements associated with such views as well as unbinding any event handlers tied to child elements when you no longer require them.
 
@@ -440,7 +306,6 @@ Backbone.View.prototype.close = function() {
         this.onClose();
     }
     this.remove();
-    this.unbind();
 };
 
 NewView = Backbone.View.extend({
@@ -472,31 +337,72 @@ In most cases, the view removal should not affect any associated models. For exa
 
 (Thanks to [dira](http://stackoverflow.com/users/906136/dira) for this tip)
 
-#### Rendering View hierarchies
+Note: You may also be interested in reading about the Marionette Composite Views in the Extensions part of the book.
+
+#### Rendering View Hierarchies
 
 **Problem**
 
-Let us say you have a Collection, where each item in the Collection could itself be a Collection. You can render each item in the Collection, and indeed can render any items which themselves are Collections. The problem you might have is how to render this structure where the HTML reflects the hierarchical nature of the data structure.
+Let us say you have a Collection, where each item in the Collection could itself be a Collection. You can render each item in the Collection, and indeed can render any items which themselves are Collections. The problem you might have is how to render HTML that reflects the hierarchical nature of the data structure.
 
 **Solution**
 
-The most straight-forward way to approach this problem is to use a framework like Derick Baileys [Backbone.Marionette](https://github.com/marionettejs/backbone.marionette). In this framework is a type of view called a CompositeView.
+The most straight-forward way to approach this problem is to use a framework like Derick Bailey's [Backbone.Marionette](https://github.com/marionettejs/backbone.marionette). In this framework is a type of view called a CompositeView.
 
 The basic idea of a CompositeView is that it can render a model and a collection within the same view.
 
-It can render a single model with a template. It can also take a collection from that model and for each model in that collection, render a view. By default it uses the same composite view type that you've defined, to render each of the models in the collection. All you have to do is tell the view instance where the collection is, via the initialize method, and you'll get a recursive hierarchy rendered.
+It can render a single model with a template. It can also take a collection from that model and for each model in that collection, render a view. By default it uses the same composite view type that you've defined to render each of the models in the collection. All you have to do is tell the view instance where the collection is, via the initialize method, and you'll get a recursive hierarchy rendered.
+
 
 There is a working demo of this in action available [online](http://jsfiddle.net/derickbailey/AdWjU/).
 
 And you can get the source code and documentation for [Marionette](https://github.com/marionettejs/backbone.marionette) too.
 
+
+#### Working With Nested Models Or Collections
+
+**Problem**
+
+Backbone doesn't include support for nested models or collections out of the box, favoring the use of good patterns for modeling your structured data on the client side. How do I work around this?
+
+**Solution**
+
+As we've seen, it's common to create collections representing groups of models using Backbone. It's also however common to wish to nest collections within models, depending on the type of application you are working on. 
+
+Take for example a Building model that contains many Room models which could sit in a Rooms collection.
+
+You could expose a `this.rooms` collection for each building, allowing you to lazy-load rooms once a building has been opened. 
+
+```javascript
+var Building = Backbone.Model.extend({
+
+    initialize: function(){
+        this.rooms = new Rooms;
+        this.rooms.url = '/building/' + this.id + '/rooms';
+        this.rooms.on("reset", this.updateCounts);
+    },
+
+    // ...
+
+});
+
+// Create a new building model
+var townHall = new Building;
+
+// once opened, lazy-load the rooms
+townHall.rooms.fetch({reset: true});
+```
+
+There are also a number of Backbone plugins which can help with nested data structures, such as [Backbone Relational](https://github.com/PaulUithol/Backbone-relational). This plugin handles one-to-one, one-to-many and many-to-one relations between models for Backbone and has some excellent [documentation](http://backbonerelational.org/).
+
+
 #### Better Model Property Validation
 
 **Problem**
 
-As we learned earlier in the book, the `validate` method on a Model is called by `set` (when the validate option is set) and `save`, and is passed the model attributes updated with the values passed to these methods.
+As we learned earlier in the book, the `validate` method on a Model is called by `set` (when the validate option is set) and `save`. It is passed the model attributes updated with the values passed to these methods.
 
-By default, when we define a custom `validate` method, Backbone passes all of a Model's attributes through this validation each time, regardless of which model attributes are being set.
+By default, when we define a custom `validate` method, Backbone passes all of a model's attributes through this validation each time, regardless of which model attributes are being set.
 
 This means that it can be a challenge to determine which specific fields are being set or validated without being concerned about the others that aren't being set at the same time.
 
@@ -541,7 +447,7 @@ HTML:
 </html>
 ```
 
-Some simple validation that could be written using the current Backbone `validate` method to work with this form could be implemented using something like:
+Basic validation that could be written using the current Backbone `validate` method to work with this form could be implemented using something like:
 
 
 ```javascript
@@ -554,7 +460,7 @@ validate: function(attrs) {
 }
 ```
 
-Unfortunately, this method would trigger a first name error each time any of the fields were blurred and only an error message next to the first name field would be presented.
+Unfortunately, this method would trigger a `firstname` error each time any of the fields were blurred and only an error message next to the first name field would be presented.
 
 One potential solution to the problem is to validate all fields and return all of the errors:
 
@@ -570,7 +476,7 @@ validate: function(attrs) {
 }
 ```
 
-This can be adapted into a complete solution that defines a Field model for each input in our form and works within the parameters of our use case as follows:
+This can be adapted into a solution that defines a Field model for each input in our form and works within the parameters of our use case as follows:
 
 ```javascript
 
@@ -595,7 +501,7 @@ $(function($) {
       this.$msg = $('[data-msg=' + this.name + ']');
     },
     validate: function() {
-      this.model.set(this.name, this.$el.val());
+      this.model.set(this.name, this.$el.val(), {validate: true});
       this.$msg.text(this.model.errors[this.name] || '');
     }
   });
@@ -610,10 +516,11 @@ $(function($) {
 
 ```
 
-
-This works great as the solution checks the validation for each attribute individually and sets the message for the correct blurred field. A [demo](http://jsbin.com/afetez/2/edit) of the above by [@braddunbar](http://github.com/braddunbar) is also available.
+This works fine as the solution checks the validation for each attribute individually and sets the message for the correct blurred field. A [demo](http://jsbin.com/afetez/2/edit) of the above by [@braddunbar](http://github.com/braddunbar) is also available.
 
 Unfortunately, this solution does perform validation on all fields every time, even though we are only displaying errors for the field that has changed. If we have multiple client-side validation methods, we may not want to have to call each validation method on every attribute every time, so this solution might not be ideal for everyone.
+
+##### Backbone.validateAll
 
 A potentially better alternative to the above is to use [@gfranko](http://github.com/@franko)'s [Backbone.validateAll](https://github.com/gfranko/Backbone.validateAll) plugin, specifically created to validate specific Model properties (or form fields) without worrying about the validation of any other Model properties (or form fields).
 
@@ -706,16 +613,44 @@ user.set({ 'firstname': 'Greg' }, {validate: true, validateAll: false});
 
 ```
 
-That's it!
-
-The Backbone.validateAll logic doesn't override the default Backbone logic by default and so it's perfectly capable of being used for scenarios where you might care more about field-validation [performance](http://jsperf.com/backbone-validateall) as well as those where you don't. Both solutions presented in this section should work fine however.
+That's it. The Backbone.validateAll logic doesn't override the default Backbone logic by default and so it's perfectly capable of being used for scenarios where you might care more about field-validation [performance](http://jsperf.com/backbone-validateall) as well as those where you don't. Both solutions presented in this section should work fine however.
 
 
-#### Multiple Backbone versions
+##### Backbone.Validation
+
+As we've seen, the `validate` method Backbone offers is `undefined` by default and you need to override it with your own custom validation logic to get model validation in place. Often developers run into the issue of implementing this validation as nested ifs and elses, which can become unmaintainable when things get complicated.
+
+Another helpful plugin for Backbone called [Backbone.Validation](https://github.com/thedersen/backbone.validation) attempts to solve this problem by offering an extensible way to declare validation rules on the model and overrides the `validate` method behind the scenes.
+
+One of the useful methods this plugin includes is (pseudo) live validation via a `preValidate` method. This can be used to check on key-press if the input for a model is valid without changing the model itself. You can run any validators for a model attribute by calling the `preValidate` method, passing it the name of the attribute along with the value you would like validated.
+
+```javascript
+// If the value of the attribute is invalid, a truthy error message is returned
+// if not, it returns a falsy value
+
+var errorMsg = user.preValidate('firstname', 'Greg');
+```
+
+##### Form-specific validation classes
+
+That said, the most optimal solution to this problem may not be to stick validation in your model attributes. Instead, you could have a function specifically designed for validating a specific form and there are many good JavaScript form validation libraries out there that can help with this.
+
+If you want to stick it on your model, you can also make it a class function:
+
+```javascript
+User.validate = function(formElement) {
+  //...
+};
+```
+
+For more information on validation plugins available for Backbone, see the [Backbone wiki](https://github.com/documentcloud/backbone/wiki/Extensions%2C-Plugins%2C-Resources#model).
+
+
+#### Avoiding Conflicts With Multiple Backbone Versions
 
 **Problem**
 
-In some instances it may be necessary to use multiple versions of Backbone in the same project.
+In instances out of your control, you may have to work around having more than one version of Backbone in the same page. How do you work around this without causing conflicts?
 
 **Solution**
 
@@ -739,7 +674,7 @@ Backbone.noConflict = function() {
 };
 ```
 
-Multiple versions of Backbone can be used on the same page by calling noConflict like this:
+Multiple versions of Backbone can be used on the same page by calling `noConflict` like this:
 
 ```javascript
 var Backbone19 = Backbone.noConflict();
@@ -748,18 +683,8 @@ var Backbone19 = Backbone.noConflict();
 // loaded version
 ```
 
-This initial configuration code also supports CommonJS modules so Backbone can be used in Node projects:
 
-```javascript
-var Backbone;
-if (typeof exports !== 'undefined') {
-  Backbone = exports;
-} else {
-  Backbone = root.Backbone = {};
-}
-```
-
-#### Building Model and View hierarchies
+#### Building Model And View Hierarchies
 
 **Problem**
 
@@ -783,17 +708,6 @@ Model.extend = Collection.extend = Router.extend = View.extend = extend;
 ```
 
 Most development with Backbone is based around inheriting from these objects, and they're designed to mimic a classical object-oriented implementation.
-
-If this sounds familiar, it's because `extend` is an Underscore.js utility, although Backbone itself does a lot more with this. See below for Underscore's `extend`:
-
-```javascript
-each(slice.call(arguments, 1), function(source) {
-  for (var prop in source) {
-    obj[prop] = source[prop];
-  }
-});
-return obj;
-```
 
 The above isn't quite the same as ECMAScript 5's `Object.create`, as it's actually copying properties (methods and values) from one object to another. As this isn't enough to support Backbone's inheritance and class model, the following steps are performed:
 
@@ -937,3 +851,199 @@ var Note = Backbone.Model.extend({
   }
 });
 ```
+
+#### Event Aggregators And Mediators
+
+**Problem** 
+
+How do I channel multiple event sources through a single object?
+
+**Solution**
+
+Using an Event Aggregator. It's common for developers to think of Mediators when faced with this problem, so let's explore what an Event Aggregator is, what the Mediator pattern is and how they differ.
+
+Design patterns often differ only in semantics and intent. That is, the language used to describe the pattern is what sets it apart, more than an implementation of that specific pattern. It often comes down to squares vs rectangles vs polygons. You can create the same end result with all three, given the constraints of a square are still met – or you can use polygons to create an infinitely larger and more complex set of things.
+
+When it comes to the Mediator and Event Aggregator patterns, there are some times where it may look like the patterns are interchangeable due to implementation similarities. However, the semantics and intent of these patterns are very different. And even if the implementations both use some of the same core constructs, I believe there is a distinct difference between them. I also believe they should not be interchanged or confused in communication because of the differences.
+
+#####Event Aggregator
+
+The core idea of the Event Aggregator, according to Martin Fowler, is to channel multiple event sources through a single object so that other objects needing to subscribe to the events don’t need to know about every event source.
+
+######Backbone’s Event Aggregator
+
+The easiest event aggregator to show is that of Backbone.js – it’s built into the Backbone object directly.
+
+```javascript
+var View1 = Backbone.View.extend({
+  // ...
+
+  events: {
+    "click .foo": "doIt"
+  },
+
+  doIt: function(){
+    // trigger an event through the event aggregator
+    Backbone.trigger("some:event");
+  }
+});
+
+var View2 = Backbone.View.extend({
+  // ...
+
+  initialize: function(){
+    // subscribe to the event aggregator's event
+    Backbone.on("some:event", this.doStuff, this);
+  },
+
+  doStuff: function(){
+    // ...
+  }
+})
+```
+
+In this example, the first view is triggering an event when a DOM element is clicked. The event is triggered through Backbone’s built-in event aggregator – the Backbone object. Of course, it’s trivial to create your own event aggregator in Backbone, and there are some key things that we need to keep in mind when using an event aggregator, to keep our code simple.
+
+#######jQuery’s Event Aggregator
+
+Did you know that jQuery has a built-in event aggregator? They don’t call it this, but it’s in there and it’s scoped to DOM events. It also happens to look like Backbone’s event aggregator:
+
+```
+$("#mainArticle").on("click", function(e){
+
+  // handle click event on any element underneath our #mainArticle element
+
+});
+```
+
+This code sets up an event handler function that waits for an unknown number of event sources to trigger a “click” event, and it allows any number of listeners to attach to the events of those event publishers. jQuery just happens to scope this event aggregator to the DOM.
+
+#####Mediator
+
+A Mediator is an object that coordinates interactions (logic and behavior) between multiple objects. It makes decisions on when to call which objects, based on the actions (or inaction) of other objects and input.
+
+**A Mediator For Backbone**
+
+Backbone doesn’t have the idea of a mediator built into it like a lot of other MV* frameworks do. But that doesn’t mean you can’t write one using a single line of code:
+
+```javascript
+var mediator = {};
+```
+
+Yes, of course this is just an object literal in JavaScript. Once again, we’re talking about semantics here. The purpose of the mediator is to control the workflow between objects and we really don’t need anything more than an object literal to do this.
+
+```javascript
+var orgChart = {
+
+  addNewEmployee: function(){
+
+    // getEmployeeDetail provides a view that users interact with
+    var employeeDetail = this.getEmployeeDetail();
+
+    // when the employee detail is complete, the mediator (the 'orgchart' object)
+    // decides what should happen next
+    employeeDetail.on("complete", function(employee){
+
+      // set up additional objects that have additional events, which are used
+      // by the mediator to do additional things
+      var managerSelector = this.selectManager(employee);
+      managerSelector.on("save", function(employee){
+        employee.save();
+      });
+
+    });
+  },
+
+  // ...
+}
+```
+
+This example shows a very basic implementation of a mediator object with Backbone-based objects that can trigger and subscribe to events. I’ve often referred to this type of object as a “workflow” object in the past, but the truth is that it is a mediator. It is an object that handles the workflow between many other objects, aggregating the responsibility of that workflow knowledge into a single object. The result is workflow that is easier to understand and maintain.
+
+#####Similarities And Differences
+
+There are, without a doubt, similarities between the event aggregator and mediator examples that I’ve shown here. The similarities boil down to two primary items: events and third-party objects. These differences are superficial at best, though. When we dig into the intent of the pattern and see that the implementations can be dramatically different, the nature of the patterns become more apparent.
+
+######Events
+
+Both the event aggregator and mediator use events, in the above examples. An event aggregator obviously deals with events – it’s in the name after all. The mediator only uses events because it makes life easy when dealing with Backbone, though. There is nothing that says a mediator must be built with events. You can build a mediator with callback methods, by handing the mediator reference to the child object, or by any of a number of other means.
+
+The difference, then, is why these two patterns are both using events. The event aggregator, as a pattern, is designed to deal with events. The mediator, though, only uses them because it’s convenient.
+
+######Third-Party Objects
+
+Both the event aggregator and mediator, by design, use a third-party object to facilitate things. The event aggregator itself is a third-party to the event publisher and the event subscriber. It acts as a central hub for events to pass through. The mediator is also a third party to other objects, though. So where is the difference? Why don’t we call an event aggregator a mediator? The answer largely comes down to where the application logic and workflow is coded.
+
+In the case of an event aggregator, the third party object is there only to facilitate the pass-through of events from an unknown number of sources to an unknown number of handlers. All workflow and business logic that needs to be kicked off is put directly into the object that triggers the events and the objects that handle the events.
+
+In the case of the mediator, though, the business logic and workflow is aggregated into the mediator itself. The mediator decides when an object should have its methods called and attributes updated based on factors that the mediator knows about. It encapsulates the workflow and process, coordinating multiple objects to produce the desired system behaviour. The individual objects involved in this workflow each know how to perform their own task. But it’s the mediator that tells the objects when to perform the tasks by making decisions at a higher level than the individual objects.
+
+An event aggregator facilitates a “fire and forget” model of communication. The object triggering the event doesn’t care if there are any subscribers. It just fires the event and moves on. A mediator, though, might use events to make decisions, but it is definitely not “fire and forget”. A mediator pays attention to a known set of input or activities so that it can facilitate and coordinate additional behavior with a known set of actors (objects).
+
+#####Relationships: When To Use Which
+
+Understanding the similarities and differences between an event aggregator and mediator is important for semantic reasons. It’s equally as important to understand when to use which pattern, though. The basic semantics and intent of the patterns does inform the question of when, but actual experience in using the patterns will help you understand the more subtle points and nuanced decisions that have to be made.
+
+######Event Aggregator Use
+
+In general, an event aggregator is used when you either have too many objects to listen to directly, or you have objects that are entirely unrelated.
+
+When two objects have a direct relationship already – say, a parent view and child view – then there might be little benefit in using an event aggregator. Have the child view trigger an event and the parent view can handle the event. This is most commonly seen in Backbone’s Collection and Model, where all Model events are bubbled up to and through its parent Collection. A Collection often uses model events to modify the state of itself or other models. Handling “selected” items in a collection is a good example of this.
+
+jQuery’s on method as an event aggregator is a great example of too many objects to listen to. If you have 10, 20 or 200 DOM elements that can trigger a “click” event, it might be a bad idea to set up a listener on all of them individually. This could quickly deteriorate performance of the application and user experience. Instead, using jQuery’s on method allows us to aggregate all of the events and reduce the overhead of 10, 20, or 200 event handlers down to 1.
+
+Indirect relationships are also a great time to use event aggregators. In Backbone applications, it is very common to have multiple view objects that need to communicate, but have no direct relationship. For example, a menu system might have a view that handles the menu item clicks. But we don’t want the menu to be directly tied to the content views that show all of the details and information when a menu item is clicked. Having the content and menu coupled together would make the code very difficult to maintain, in the long run. Instead, we can use an event aggregator to trigger “menu:click:foo” events, and have a “foo” object handle the click event to show its content on the screen.
+
+######Mediator Use
+
+A mediator is best applied when two or more objects have an indirect working relationship, and business logic or workflow needs to dictate the interactions and coordination of these objects.
+
+A wizard interface is a good example of this, as shown with the “orgChart” example, above. There are multiple views that facilitate the entire workflow of the wizard. Rather than tightly coupling the view together by having them reference each other directly, we can decouple them and more explicitly model the workflow between them by introducing a mediator.
+
+The mediator extracts the workflow from the implementation details and creates a more natural abstraction at a higher level, showing us at a much faster glance what that workflow is. We no longer have to dig into the details of each view in the workflow, to see what the workflow actually is.
+
+#####Event Aggregator And Mediator Together
+
+The crux of the difference between an event aggregator and a mediator, and why these pattern names should not be interchanged with each other, is illustrated best by showing how they can be used together. The menu example for an event aggregator is the perfect place to introduce a mediator as well.
+
+Clicking a menu item may trigger a series of changes throughout an application. Some of these changes will be independent of others, and using an event aggregator for this makes sense. Some of these changes may be internally related to each other, though, and may use a mediator to enact those changes. A mediator, then, could be set up to listen to the event aggregator. It could run its logic and process to facilitate and coordinate many objects that are related to each other, but unrelated to the original event source.
+
+```javascript
+var MenuItem = Backbone.View.extend({
+
+  events: {
+    "click .thatThing": "clickedIt"
+  },
+
+  clickedIt: function(e){
+    e.preventDefault();
+
+    // assume this triggers "menu:click:foo"
+    Backbone.trigger("menu:click:" + this.model.get("name"));
+  }
+
+});
+
+// ... somewhere else in the app
+
+var MyWorkflow = function(){
+  Backbone.on("menu:click:foo", this.doStuff, this);
+};
+
+MyWorkflow.prototype.doStuff = function(){
+  // instantiate multiple objects here.
+  // set up event handlers for those objects.
+  // coordinate all of the objects into a meaningful workflow.
+};
+```
+
+In this example, when the MenuItem with the right model is clicked, the `“menu:click:foo”` event will be triggered. An instance of the “MyWorkflow” object, assuming one is already instantiated, will handle this specific event and will coordinate all of the objects that it knows about, to create the desired user experience and workflow.
+
+An event aggregator and a mediator have been combined to create a much more meaningful experience in both the code and the application itself. We now have a clean separation between the menu and the workflow through an event aggregator and we are still keeping the workflow itself clean and maintainable through the use of a mediator.
+
+#####Pattern Language: Semantics
+
+There is one overriding point to make in all of this discussion: semantics. Communicating intent and semantics through the use of named patterns is only viable and only valid when all parties in a communication medium understand the language in the same way.
+
+If I say “apple”, what am I talking about? Am I talking about a fruit? Or am I talking about a technology and consumer products company? As Sharon Cichelli says: “semantics will continue to be important, until we learn how to communicate in something other than language”.
+
